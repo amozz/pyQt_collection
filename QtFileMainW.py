@@ -4,17 +4,20 @@
 Module implementing QtFileMainWindow.
 """
 import PyQt4,  PyQt4.QtGui
-import sys,  fileinput
+import sys,  fileinput, codecs
 from PyQt4.QtGui import QMainWindow
 from PyQt4.QtCore import pyqtSignature
 
 from Ui_QtFileMainW import Ui_MainWindow
 
 def replaceAll(file, searchStr, replaceStr):
+    # the file must be in UTF-8 format
     for line in fileinput.input(file, inplace=1):
-        if searchStr in line:
+        if searchStr in unicode(line, 'utf-8'):
             #line = line.replace(searchStr, replaceStr)
-            line = line.rstrip().replace(searchStr, replaceStr)
+            line = unicode(line, 'utf-8')
+            line = line.replace(searchStr, replaceStr)            
+            line = line.encode('utf-8')
         sys.stdout.write(line)
 
 class QtFileMainWindow(QMainWindow, Ui_MainWindow):
@@ -43,7 +46,7 @@ class QtFileMainWindow(QMainWindow, Ui_MainWindow):
         self.filename = dlg.getOpenFileName()
         self.hasfilename = True
         from os.path import isfile
-        if isfile(self.filename):
+        if isfile(unicode(self.filename)):
             self.fileName.setText(self.filename)
     
     @pyqtSignature("bool")
@@ -69,9 +72,9 @@ class QtFileMainWindow(QMainWindow, Ui_MainWindow):
                 replaceAll(unicode(self.filename),  unicode(self.searchStr.toPlainText()),  unicode(self.replacedStr.toPlainText()))
             else:            
                 replaceAll(unicode(self.filename),  unicode(self.searchStr.toPlainText()),  "")
-            PyQt4.QtGui.QMessageBox.about(self, "My message box", "%s" % u"处理完成")
+            PyQt4.QtGui.QMessageBox.about(self, "", "%s" % u"处理完成")
         else:
-            PyQt4.QtGui.QMessageBox.about(self, "My message box", "%s" %  u'请输入文件名及要查找的字符串')
+            PyQt4.QtGui.QMessageBox.about(self, "", "%s" %  u'请输入文件名及要查找的字符串')
             
 
 
